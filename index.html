@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Competency Assessment Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- SheetJS library for Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="logo">
+            <h2>🛡️ Safety Training & Testing Portal / सुरक्षा प्रशिक्षण एवं परीक्षा</h2>
+        </div>
+        <button id="adminLoginBtn" onclick="openAdminModal()">Admin Login / एडमिन लॉगिन</button>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Study Material Section -->
+        <section id="studySection" class="card">
+            <h2>📚 Safety Study Modules / सुरक्षा अध्ययन सामग्री</h2>
+            <p class="subtitle">Kripya test dene se pehle niche diye gaye sabhi 10 safety topics ko dhyan se padhein.</p>
+            
+            <div class="pdf-grid" id="pdfGrid">
+                <!-- Dynamic PDF links will load here -->
+            </div>
+
+            <div class="center-btn">
+                <button class="btn-primary" onclick="openCandidateModal()">Start Test / टेस्ट शुरू करें</button>
+            </div>
+        </section>
+
+        <!-- Test Engine Section (Hidden by default) -->
+        <section id="testSection" class="card hidden">
+            <div class="test-header">
+                <div class="candidate-info-bar" id="candidateBar"></div>
+                <div class="timer-box">⏱️ Remaining Time: <span id="timer">50:00</span></div>
+            </div>
+
+            <form id="quizForm">
+                <div id="questionsContainer"></div>
+                <button type="button" class="btn-success" onclick="submitTest()">Submit Test / टेस्ट जमा करें</button>
+            </form>
+        </section>
+
+        <!-- User Result View (Hidden by default) -->
+        <section id="userResultSection" class="card hidden">
+            <h2>🎉 Test Completed / परीक्षा पूर्ण हुई</h2>
+            <div class="result-box">
+                <p><strong>Candidate Name:</strong> <span id="resName"></span></p>
+                <p><strong>Vendor Name:</strong> <span id="resVendor"></span></p>
+                <p><strong>Total Score / कुल अंक:</strong> <span id="resScore"></span> / 50</p>
+                <p><strong>Time Taken / लिया गया समय:</strong> <span id="resTime"></span></p>
+            </div>
+            <p class="note">* Aapka result server par save kar diya gaya hai. / Your result has been saved.</p>
+        </section>
+
+        <!-- Admin Dashboard Section (Hidden by default) -->
+        <section id="adminDashboard" class="card hidden">
+            <div class="admin-header">
+                <h2>⚙️ Admin Control Panel / एडमिन कंट्रोल पैनल</h2>
+                <button class="btn-danger" onclick="logoutAdmin()">Logout</button>
+            </div>
+
+            <!-- PDF Upload Section -->
+            <div class="admin-subcard">
+                <h3>📄 Upload / Manage PDF Study Materials</h3>
+                <div class="upload-form">
+                    <input type="text" id="pdfTitleInput" placeholder="Topic Name (e.g. Working at Height)">
+                    <input type="text" id="pdfUrlInput" placeholder="PDF File Link (e.g. GitHub URL / Google Drive link)">
+                    <button class="btn-secondary" onclick="addStudyMaterial()">Add Module</button>
+                </div>
+            </div>
+
+            <!-- Submissions Table Section -->
+            <div class="admin-subcard">
+                <div class="table-actions">
+                    <h3>📊 Manpower Test Results</h3>
+                    <button class="btn-excel" onclick="exportToExcel()">📥 Export to Excel</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Name</th>
+                                <th>Vendor</th>
+                                <th>Safety Pass No.</th>
+                                <th>Department</th>
+                                <th>Time Taken</th>
+                                <th>Score</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <!-- Results will load here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Candidate Registration Modal -->
+    <div id="candidateModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCandidateModal()">&times;</span>
+            <h2>👨‍🏭 Manpower Registration & Declaration</h2>
+            <p>Test shuru karne se pehle apni details bharein:</p>
+            <form id="candidateForm" onsubmit="startTest(event)">
+                <label>Full Name / पूरा नाम:</label>
+                <input type="text" id="candName" required>
+
+                <label>Vendor Name / वेन्डर का नाम:</label>
+                <input type="text" id="candVendor" required>
+
+                <label>Safety Pass Number / सेफ्टी पास नंबर:</label>
+                <input type="text" id="candPassNo" required>
+
+                <label>Department / विभाग:</label>
+                <input type="text" id="candDept" required>
+
+                <div class="checkbox-container">
+                    <input type="checkbox" id="declCheckbox" required>
+                    <label for="declCheckbox">
+                        Maine sabhi 10 safety topics ki padhai kar li hai aur main test dene ke liye tayar hu. /
+                        I have studied all safety materials and I am ready for the test.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary full-width">Proceed to Test / टेस्ट शुरू करें</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdminModal()">&times;</span>
+            <h2>🔐 Admin Login</h2>
+            <form onsubmit="handleAdminLogin(event)">
+                <label>User ID:</label>
+                <input type="text" id="adminId" required>
+
+                <label>Password:</label>
+                <input type="password" id="adminPass" required>
+
+                <button type="submit" class="btn-primary full-width">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Candidate Detail View Modal (For Admin) -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content wide">
+            <span class="close" onclick="closeViewModal()">&times;</span>
+            <h2>📋 Detailed Answer Sheet</h2>
+            <div id="viewDetailsContent"></div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
